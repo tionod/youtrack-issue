@@ -3,6 +3,7 @@ package tz.jetbrains.youtrack.page;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import tz.jetbrains.youtrack.AbstractPage;
 import tz.jetbrains.youtrack.page.issue.NewIssuePage;
 
 public class MainPage extends AbstractPage<MainPage> {

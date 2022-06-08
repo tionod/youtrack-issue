@@ -4,12 +4,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import tz.jetbrains.youtrack.page.AbstractPage;
+import tz.jetbrains.youtrack.AbstractPage;
+import tz.jetbrains.youtrack.element.IssueFieldsPanel;
 
 public class NewIssuePage extends AbstractPage<NewIssuePage> {
 
     private final By createButtonLocator = By.xpath("//button[@data-test='createIssueAction']");
-    private final By cancelButtonLocator = By.xpath("//button[@data-test='cancelAction']");
     private final By summaryFieldLocator = By.xpath("//textarea[@data-test='issueSummary']");
     private final By editorProseMirrorLocator = By.xpath("//div[contains(@class, 'ProseMirror')]");
     private final By attachmentLocator = By.xpath("//input[@type='file']");
@@ -18,12 +18,16 @@ public class NewIssuePage extends AbstractPage<NewIssuePage> {
         super(driver, "/newIssue", NewIssuePage.class);
     }
 
-    public WebElement getCreateButton() {
-        return getWebElement(createButtonLocator);
+    public IssuePage createIssue() {
+        WebElement createButton = getCreateButton();
+        if (createButton.isEnabled()) {
+            createButton.click();
+        }
+        return new IssuePage(driver);
     }
 
-    public WebElement getCancelButton() {
-        return getWebElement(cancelButtonLocator);
+    public WebElement getCreateButton() {
+        return getWebElement(createButtonLocator);
     }
 
     public void inputTextToEditor(String value) {
@@ -36,6 +40,10 @@ public class NewIssuePage extends AbstractPage<NewIssuePage> {
         WebElement attachment = driver.findElement(attachmentLocator);
         attachment.sendKeys(filePath);
         wait.until(ExpectedConditions.invisibilityOf(attachment));
+    }
+
+    public IssueFieldsPanel getIssueFieldsPanel() {
+        return new IssueFieldsPanel(driver);
     }
 
     public void inputSummary(String value) {

@@ -1,4 +1,4 @@
-package tz.jetbrains.youtrack.page;
+package tz.jetbrains.youtrack;
 
 
 import org.openqa.selenium.By;
@@ -10,6 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import tz.jetbrains.helper.ConfigHelper;
 
 import java.time.Duration;
+import java.util.List;
 
 public abstract class AbstractPage<T> {
 
@@ -44,5 +45,9 @@ public abstract class AbstractPage<T> {
 
     protected WebElement getWebElement(By locator) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    protected List<WebElement> getWebElements(By locator) {
+        return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(locator));
     }
 }
