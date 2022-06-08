@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import tz.jetbrains.helper.ConfigHelper;
+import tz.jetbrains.webdriver.WebDriverService;
+import tz.jetbrains.youtrack.element.HeaderMenu;
 import tz.jetbrains.youtrack.page.LoginPage;
-import tz.jetbrains.youtrack.page.MainPage;
 import tz.jetbrains.youtrack.page.issue.NewIssuePage;
 
 import java.io.File;
@@ -23,10 +25,12 @@ public class IssueCreationTests extends BaseHooks {
     private static String password;
 
     @BeforeAll
-    static void prepareUser() {
+    static void prepare() {
         var youTrackProperties = ConfigHelper.getYouTrackProperties();
         username = youTrackProperties.getLogin();
         password = youTrackProperties.getPassword();
+
+        switchUIToClassicMode(username, password);
     }
 
     @Test
@@ -104,8 +108,8 @@ public class IssueCreationTests extends BaseHooks {
     }
 
     private NewIssuePage signInAndGoToNewIssuePage() {
-        LoginPage loginPage = new LoginPage(webDriver).open();
-        MainPage mainPage = loginPage.signIn(username, password);
+        var loginPage = new LoginPage(webDriver).open();
+        var mainPage = loginPage.signIn(username, password);
         return mainPage.goToNewIssuePage();
     }
 
@@ -122,5 +126,18 @@ public class IssueCreationTests extends BaseHooks {
         randomElement.click();
 
         return entry.getKey();
+    }
+
+    /** Проверка и отключение YouTrack Lite если интерфейс включен
+     * @param username пользователя от лица которого будут выполняться тесты
+     * @param password пользователя от лица которого будут выполняться тесты
+     */
+    private static void switchUIToClassicMode(String username, String password) {
+        WebDriver driver = WebDriverService.getDriver();
+        var loginPage = new LoginPage(driver).open();
+        loginPage.signIn(username, password);
+        var headerMenu = new HeaderMenu(driver);
+        headerMenu.switchUIToClassicMode();
+        driver.quit();
     }
 }
