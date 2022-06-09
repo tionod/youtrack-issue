@@ -5,16 +5,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import tz.jetbrains.youtrack.AbstractPage;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class IssueFieldsPanel extends AbstractPage<IssueFieldsPanel> {
 
+    private final By projectButtonLocator = By.xpath("//button[@data-test='issue-project']");
     private final By priorityButtonLocator = By.xpath("//button[@data-test='Priority']");
     private final By issueTypeButtonLocator = By.xpath("//button[@data-test='Type']");
     private final By issueStateButtonLocator = By.xpath("//button[@data-test='State']");
-    private final By ringListItemLocator = By.xpath("//div[@data-test='ring-list-item-action ring-list-item']/button");
 
     public IssueFieldsPanel(WebDriver driver) {
         super(driver, "", IssueFieldsPanel.class);
@@ -35,15 +33,19 @@ public class IssueFieldsPanel extends AbstractPage<IssueFieldsPanel> {
         return mapWebElements(getRingListItems());
     }
 
-    public String getPriority() {
+    public String getProjectName() {
+        return getWebElement(projectButtonLocator).getText();
+    }
+
+    public String getPriorityName() {
         return getPriorityButton().getText();
     }
 
-    public String getType() {
+    public String getTypeName() {
         return getTypeButton().getText();
     }
 
-    public String getState() {
+    public String getStateName() {
         return getStateButton().getText();
     }
 
@@ -58,15 +60,4 @@ public class IssueFieldsPanel extends AbstractPage<IssueFieldsPanel> {
     protected WebElement getStateButton() {
         return getWebElement(issueStateButtonLocator);
     }
-
-    protected List<WebElement> getRingListItems() {
-        return getWebElements(ringListItemLocator);
-    }
-
-    private Map<String, WebElement> mapWebElements(List<WebElement> elements) {
-        Map<String, WebElement> map = new HashMap<>();
-        elements.forEach(e -> map.put(e.getText().split("\n")[0], e));
-        return map;
-    }
-
 }

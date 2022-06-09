@@ -3,6 +3,7 @@ package tz.jetbrains.webdriver;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -38,8 +39,12 @@ public class WebDriverService {
     }
 
     private static DesiredCapabilities getDefaultCapabilities() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+
         DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability("browserName", "chrome");
+        capabilities.setCapability(ChromeOptions.CAPABILITY, options);
         capabilities.setCapability(
                 "selenoid:options",
                 Map.<String, Object>of(

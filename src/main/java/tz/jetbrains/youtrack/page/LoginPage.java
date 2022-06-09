@@ -15,11 +15,11 @@ public class LoginPage extends AbstractPage<LoginPage> {
         super(driver, "/hub/auth/login", LoginPage.class);
     }
 
-    public MainPage signIn(String username, String password) {
+    public DashboardPage signIn(String username, String password) {
         setUsername(username);
         setPassword(password);
         getLoginButton().click();
-        return new MainPage(driver);
+        return new DashboardPage(driver);
     }
 
     public void setUsername(String username) {

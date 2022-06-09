@@ -1,6 +1,7 @@
 package tz.jetbrains.youtrack;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,9 @@ import org.openqa.selenium.WebElement;
 import tz.jetbrains.helper.ConfigHelper;
 import tz.jetbrains.webdriver.WebDriverService;
 import tz.jetbrains.youtrack.element.HeaderMenu;
+import tz.jetbrains.youtrack.page.DashboardPage;
 import tz.jetbrains.youtrack.page.LoginPage;
+import tz.jetbrains.youtrack.page.issue.IssuePage;
 import tz.jetbrains.youtrack.page.issue.NewIssuePage;
 
 import java.io.File;
@@ -74,6 +77,21 @@ public class IssueCreationTests extends BaseHooks {
     }
 
     @Test
+    @DisplayName("Создание issue после изменения проекта")
+    void checkIssueCreationWhenProjectChanged() {
+        var newIssuePage = signInAndGoToNewIssuePage();
+        String expectedSummary = inputAndGetRandomSummary(newIssuePage);
+        String expectedProject = pickAndGetNotCurrentFieldValue("", newIssuePage.getAvailableProjects());
+
+        newIssuePage.waitUntilCreateButtonToBeClickable();
+        var issue = newIssuePage.createIssue();
+        assertAll(
+                () -> assertEquals(expectedSummary, issue.getSummary()),
+                () -> assertEquals(expectedProject, issue.getIssueFieldsPanel().getProjectName())
+        );
+    }
+
+    @Test
     @DisplayName("Создание issue после изменения параметров")
     void checkIssueCreationWhenIssueFieldsChanged() {
         var newIssuePage = signInAndGoToNewIssuePage();
@@ -81,24 +99,84 @@ public class IssueCreationTests extends BaseHooks {
 
         var issueFieldsOnCreatePage = newIssuePage.getIssueFieldsPanel();
         String expectedPriority = pickAndGetNotCurrentFieldValue(
-                issueFieldsOnCreatePage.getPriority(), issueFieldsOnCreatePage.getAvailablePriorities()
+                issueFieldsOnCreatePage.getPriorityName(), issueFieldsOnCreatePage.getAvailablePriorities()
         );
         String expectedType = pickAndGetNotCurrentFieldValue(
-                issueFieldsOnCreatePage.getType(), issueFieldsOnCreatePage.getAvailableTypes()
+                issueFieldsOnCreatePage.getTypeName(), issueFieldsOnCreatePage.getAvailableTypes()
         );
 
         String expectedState = pickAndGetNotCurrentFieldValue(
-                issueFieldsOnCreatePage.getState(), issueFieldsOnCreatePage.getAvailableStates()
+                issueFieldsOnCreatePage.getStateName(), issueFieldsOnCreatePage.getAvailableStates()
         );
 
         var issuePage = newIssuePage.createIssue();
         var issueFieldsPanelOnViewPage = issuePage.getIssueFieldsPanel();
         assertAll(
                 () -> assertEquals(expectedSummary, issuePage.getSummary()),
-                () -> assertEquals(expectedPriority, issueFieldsPanelOnViewPage.getPriority()),
-                () -> assertEquals(expectedType, issueFieldsPanelOnViewPage.getType()),
-                () -> assertEquals(expectedState, issueFieldsPanelOnViewPage.getState())
+                () -> assertEquals(expectedPriority, issueFieldsPanelOnViewPage.getPriorityName()),
+                () -> assertEquals(expectedType, issueFieldsPanelOnViewPage.getTypeName()),
+                () -> assertEquals(expectedState, issueFieldsPanelOnViewPage.getStateName())
         );
+    }
+
+    @Test
+    @DisplayName("Создание issue cо связью с другой issue")
+    void checkLinkedIssueCreation() {
+        var firstIssueCreatePage = signInAndGoToNewIssuePage();
+        String firstSummary = inputAndGetRandomSummary(firstIssueCreatePage);
+        String firstIssueId = firstIssueCreatePage
+                .createIssue()
+                .getIssueId();
+
+        var headerMenu = new HeaderMenu(webDriver);
+        String pickedLinkType = pickAndGetNotCurrentFieldValue("", headerMenu.getAvailableIssueLinkTypes());
+        headerMenu.waitLoading();
+
+        var secondIssueCreatePage = new NewIssuePage(webDriver);
+        String secondSummary = inputAndGetRandomSummary(secondIssueCreatePage);
+        IssuePage issueWithLink = secondIssueCreatePage.createIssue();
+        assertAll(
+                () -> assertEquals(secondSummary, issueWithLink.getSummary()),
+                () -> assertTrue(pickedLinkType.equalsIgnoreCase(issueWithLink.getIssueLinksListGroupTitleLocalor())),
+                () -> assertEquals(firstIssueId, issueWithLink.getLinkedIssueId()),
+                () -> assertEquals(firstSummary, issueWithLink.getLinkedIssueSummary())
+        );
+    }
+
+    @Test
+    @DisplayName("Создание issue из черновика")
+    void checkIssueCreationFromDraft() {
+        var draftIssueCreatePage = signInAndGoToNewIssuePage();
+        String draftSummary = inputAndGetRandomSummary(draftIssueCreatePage);
+        String draftDesc = faker.bojackHorseman().quotes();
+        draftIssueCreatePage.inputTextToEditor(draftDesc);
+
+        var draftIssueFieldsPanel = draftIssueCreatePage.getIssueFieldsPanel();
+        String draftPriority = draftIssueFieldsPanel.getPriorityName();
+        String draftType = draftIssueFieldsPanel.getTypeName();
+        String draftState = draftIssueFieldsPanel.getStateName();
+
+        Assertions.assertTrue(draftIssueCreatePage.getDeleteDraftButton().isDisplayed(), "черновик не был сохранен");
+
+        draftIssueCreatePage.cancelIssue();
+        new DashboardPage(webDriver).waitPageLoading();
+
+        var headerMenu = new HeaderMenu(webDriver);
+        var newIssuePage = headerMenu.goToNewIssuePage();
+        newIssuePage.getAvailableDrafts()
+                .get(draftSummary)
+                .click();
+        newIssuePage = new NewIssuePage(webDriver);
+        var issue = newIssuePage.createIssue();
+        var issueFieldsPanel = issue.getIssueFieldsPanel();
+        Assertions.assertAll(
+                () -> assertEquals(draftSummary, issue.getSummary()),
+                () -> assertEquals(draftDesc, issue.getDescription()),
+                () -> assertEquals(draftPriority, issueFieldsPanel.getPriorityName()),
+                () -> assertEquals(draftType, issueFieldsPanel.getTypeName()),
+                () -> assertEquals(draftState, issueFieldsPanel.getStateName())
+        );
+
     }
 
     private String inputAndGetRandomSummary(NewIssuePage page) {
@@ -109,10 +187,9 @@ public class IssueCreationTests extends BaseHooks {
 
     private NewIssuePage signInAndGoToNewIssuePage() {
         var loginPage = new LoginPage(webDriver).open();
-        var mainPage = loginPage.signIn(username, password);
-        return mainPage.goToNewIssuePage();
+        loginPage.signIn(username, password);
+        return new HeaderMenu(webDriver).goToNewIssuePage();
     }
-
 
     private String pickAndGetNotCurrentFieldValue(String currentValue, Map<String, WebElement> availableValues) {
         availableValues.remove(currentValue);
@@ -128,7 +205,9 @@ public class IssueCreationTests extends BaseHooks {
         return entry.getKey();
     }
 
-    /** Проверка и отключение YouTrack Lite если интерфейс включен
+    /**
+     * Проверка и отключение YouTrack Lite если интерфейс включен
+     *
      * @param username пользователя от лица которого будут выполняться тесты
      * @param password пользователя от лица которого будут выполняться тесты
      */
