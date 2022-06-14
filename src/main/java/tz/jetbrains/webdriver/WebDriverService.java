@@ -1,7 +1,6 @@
 package tz.jetbrains.webdriver;
 
 import lombok.SneakyThrows;
-import lombok.experimental.UtilityClass;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -11,7 +10,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import java.net.URI;
 import java.util.Map;
 
-@UtilityClass
 public class WebDriverService {
 
     public static final String REMOTE_ADDRESS = "http://localhost:4444/wd/hub";

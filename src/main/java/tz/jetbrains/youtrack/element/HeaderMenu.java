@@ -4,12 +4,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import tz.jetbrains.youtrack.AbstractPage;
+import tz.jetbrains.youtrack.AbstractElement;
 import tz.jetbrains.youtrack.page.issue.NewIssuePage;
 
 import java.util.Map;
 
-public class HeaderMenu extends AbstractPage<HeaderMenu> {
+public class HeaderMenu extends AbstractElement {
 
     private static final String SWITCH_UI_CHECKBOX_XPATH = "//div[@aria-label='Dropdown menu']" +
             "//input[@data-test='ring-toggle-input']";
@@ -21,7 +21,7 @@ public class HeaderMenu extends AbstractPage<HeaderMenu> {
     private final By ringListItemLabelLocator = By.xpath("//div[@data-test='ring-list-item-label']");
 
     public HeaderMenu(WebDriver driver) {
-        super(driver, "", HeaderMenu.class);
+        super(driver);
     }
 
     public NewIssuePage goToNewIssuePage() {

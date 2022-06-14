@@ -8,7 +8,7 @@ import tz.jetbrains.webdriver.WebDriverService;
 
 public class BaseHooks {
     protected static Faker faker = new Faker();
-    protected static WebDriver webDriver;
+    protected WebDriver webDriver;
 
     @BeforeEach
     void setup() {

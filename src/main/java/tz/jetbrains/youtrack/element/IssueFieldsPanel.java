@@ -3,11 +3,11 @@ package tz.jetbrains.youtrack.element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import tz.jetbrains.youtrack.AbstractPage;
+import tz.jetbrains.youtrack.AbstractElement;
 
 import java.util.Map;
 
-public class IssueFieldsPanel extends AbstractPage<IssueFieldsPanel> {
+public class IssueFieldsPanel extends AbstractElement {
 
     private final By projectButtonLocator = By.xpath("//button[@data-test='issue-project']");
     private final By priorityButtonLocator = By.xpath("//button[@data-test='Priority']");
@@ -15,7 +15,7 @@ public class IssueFieldsPanel extends AbstractPage<IssueFieldsPanel> {
     private final By issueStateButtonLocator = By.xpath("//button[@data-test='State']");
 
     public IssueFieldsPanel(WebDriver driver) {
-        super(driver, "", IssueFieldsPanel.class);
+        super(driver);
     }
 
     public Map<String, WebElement> getAvailablePriorities() {

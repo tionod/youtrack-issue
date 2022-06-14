@@ -1,6 +1,5 @@
 package tz.jetbrains.helper;
 
-import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import tz.jetbrains.pojo.YouTrackProperties;
 
@@ -11,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 @Slf4j
-@UtilityClass
 public class ConfigHelper {
 
     private static final String CONFIG_FILE_NAME = "config.properties";
@@ -21,8 +19,8 @@ public class ConfigHelper {
         Properties configProperties = getProperties();
         YouTrackProperties youTrackProperties = new YouTrackProperties();
         youTrackProperties.setUrl(configProperties.getProperty("youtrack.url"));
-        youTrackProperties.setLogin(configProperties.getProperty("youtrack.root.login"));
-        youTrackProperties.setPassword(configProperties.getProperty("youtrack.root.password"));
+        youTrackProperties.setLogin(configProperties.getProperty("youtrack.reporter.login"));
+        youTrackProperties.setPassword(configProperties.getProperty("youtrack.reporter.password"));
         return youTrackProperties;
     }
 
